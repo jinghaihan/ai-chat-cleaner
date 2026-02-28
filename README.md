@@ -11,6 +11,10 @@ Clean and remove AI chat with an interactive terminal UI.
 npx ai-chat-cleaner
 ```
 
+<p align='center'>
+<img src='./assets/screenshot.png' alt="screenshot" />
+</p>
+
 - Supported agents:
   - `codex`
 
