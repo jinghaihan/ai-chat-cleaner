@@ -10,7 +10,10 @@ import { detectClaudeCode } from './detect'
 import { groupClaudeCodeThreads } from './group'
 
 export async function promptClaudeCode(_options: CommandOptions) {
+  const spinner = p.spinner()
+  spinner.start('detecting claude-code threads...')
   const { threads } = await detectClaudeCode()
+  spinner.stop(`detected ${c.yellow`${threads.length}`} threads`)
 
   if (threads.length === 0) {
     p.outro(c.yellow('no threads found'))

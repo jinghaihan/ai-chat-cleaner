@@ -19,6 +19,7 @@
     "claude-code",
     "conversation",
     "threads",
+    "history",
     "cleaner"
   ],
   "exports": {
