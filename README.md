@@ -11,6 +11,11 @@ Clean and remove AI chat with an interactive terminal UI.
 npx ai-chat-cleaner
 ```
 
+> [!WARNING]
+> Please restart your AI coding tool after deletion.
+>
+> It is recommended to clean history while Codex is not running, to avoid duplicate writes.
+
 <p align='center'>
 <img src='./assets/screenshot.png' alt="screenshot" />
 </p>
@@ -18,16 +23,15 @@ npx ai-chat-cleaner
 - Supported agents:
   - `codex`
 
-> [!WARNING]
-> Please restart your AI coding tool after deletion.
->
-> It is recommended to clean history while Codex is not running, to avoid duplicate writes.
-
 ## Why ?
 
 I am not entirely sure why `Codex` and `Claude Code` do not provide a way to delete a specific conversation history, perhaps to preserve context continuity.
 
 But in practice, one conversation that goes in the wrong direction can keep affecting later outputs, so I built this tool.
+
+## Credit
+
+The terminal interaction mode is inspired by [taze](https://github.com/antfu-collective/taze).
 
 ## License
 

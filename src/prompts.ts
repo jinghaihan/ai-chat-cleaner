@@ -201,7 +201,7 @@ function renderGroups<T>(state: PromptState, groups: Array<NormalizedGroup<T>>) 
 
   process.stdout.write(`${c.gray(`${Y('↑↓')} select  ${Y('space')} toggle group  ${Y('→')} enter group`)}\n`)
   process.stdout.write(`${c.gray(`${Y('enter')} confirm  ${Y('esc')} cancel  ${Y('a')} toggle all`)}\n\n`)
-  process.stdout.write(`selected ${c.red(`${selectedCount}/${totalCount}`)}\n\n`)
+  process.stdout.write(`${c.gray('selected')} ${c.red(`${selectedCount}/${totalCount}`)}\n\n`)
 
   const labelWidth = Math.min(36, Math.max(12, ...groups.map(group => group.label.length)))
   const countWidth = Math.max(7, ...groups.map((group) => {
@@ -238,7 +238,7 @@ function renderItems<T>(state: PromptState, groups: Array<NormalizedGroup<T>>) {
 
   process.stdout.write(`${c.gray(`${Y('↑↓')} select  ${Y('space')} toggle  ${Y('←')} back`)}\n`)
   process.stdout.write(`${c.gray(`${Y('enter')} back  ${Y('esc')} back  ${Y('a')} toggle group`)}\n\n`)
-  process.stdout.write(`selected ${c.red(`${selectedCount}/${totalCount}`)}\n`)
+  process.stdout.write(`${c.gray('selected')} ${c.red(`${selectedCount}/${totalCount}`)}\n`)
   process.stdout.write('\n')
   process.stdout.write(`${c.green(group.label)} ${c.gray(group.path ? tildifyPath(group.path) : '(unknown cwd)')}\n\n`)
 
