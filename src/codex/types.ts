@@ -18,3 +18,11 @@ export interface ThreadData {
   cwd: string
   title: string
 }
+
+export interface ThreadGroup {
+  id: string
+  label: string
+  cwd: string
+  threads: ThreadData[]
+  updatedAt: number
+}

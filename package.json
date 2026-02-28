@@ -47,6 +47,7 @@
     "p-limit": "catalog:prod",
     "pathe": "catalog:prod",
     "rimraf": "catalog:prod",
+    "tildify": "catalog:prod",
     "tinyglobby": "catalog:prod"
   },
   "devDependencies": {
