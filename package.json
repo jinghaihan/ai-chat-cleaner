@@ -1,0 +1,70 @@
+{
+  "name": "ai-chat-cleaner",
+  "type": "module",
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.30.3",
+  "description": "Clean and remove AI chat with an interactive terminal UI.",
+  "author": "jinghaihan",
+  "license": "MIT",
+  "homepage": "https://github.com/jinghaihan/ai-chat-cleaner#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jinghaihan/ai-chat-cleaner.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jinghaihan/ai-chat-cleaner/issues"
+  },
+  "keywords": [],
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./cli": "./dist/cli.mjs",
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.mts",
+  "bin": {
+    "ai-chat-cleaner": "./bin/cli.mjs"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "scripts": {
+    "start": "tsx ./src/cli.ts",
+    "build": "tsdown",
+    "deps": "taze major -I",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "release": "bumpp",
+    "bootstrap": "pnpm install",
+    "prepare": "simple-git-hooks",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@clack/prompts": "catalog:prod",
+    "ansis": "catalog:prod",
+    "cac": "catalog:prod",
+    "pathe": "catalog:prod",
+    "tinyglobby": "catalog:prod"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:build",
+    "bumpp": "catalog:dev",
+    "pncat": "catalog:dev",
+    "simple-git-hooks": "catalog:dev",
+    "taze": "catalog:dev",
+    "tsx": "catalog:dev",
+    "typescript": "catalog:dev",
+    "@octohash/eslint-config": "catalog:lint",
+    "eslint": "catalog:lint",
+    "lint-staged": "catalog:lint",
+    "vitest": "catalog:test",
+    "@types/node": "catalog:types"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
+  },
+  "lint-staged": {
+    "*": "eslint --fix"
+  }
+}
