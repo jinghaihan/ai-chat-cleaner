@@ -29,7 +29,7 @@ export async function resolveConfig(options: Partial<CommandOptions>): Promise<O
 
 async function resolveAgent(): Promise<AgentType> {
   const selected = await p.select({
-    message: 'Select agent to clean',
+    message: 'select agent to clean',
     options: AGENTS_CHOICES.map(agent => ({
       value: agent,
       label: AGENTS_CONFIG[agent].name,

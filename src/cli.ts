@@ -4,6 +4,7 @@ import process from 'node:process'
 import * as p from '@clack/prompts'
 import c from 'ansis'
 import { cac } from 'cac'
+import { promptClaudeCode } from './claude-code'
 import { promptCodex } from './codex'
 import { resolveConfig } from './config'
 import { NAME, VERSION } from './constants'
@@ -13,7 +14,7 @@ try {
 
   cli
     .command('', 'Clean and remove AI chat with an interactive terminal UI')
-    .option('-a, --agents <agent>', 'Agent to clean')
+    .option('--agent, -a <agent>', 'Agent to clean')
     .allowUnknownOptions()
     .action(async (options: Partial<CommandOptions>) => {
       p.intro(`${c.yellow`${NAME} `}${c.dim`v${VERSION}`}`)
@@ -26,10 +27,11 @@ try {
           break
         }
         case 'claude-code': {
+          await promptClaudeCode(config)
           break
         }
         default: {
-          p.outro(c.red`unknown agent: ${config.agents}`)
+          p.outro(`unknown agent: ${c.red(config.agents)}`)
           process.exit(1)
         }
       }

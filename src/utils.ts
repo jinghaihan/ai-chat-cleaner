@@ -6,12 +6,34 @@ export const exec = promisify(execFile)
 
 export async function readJSON(filepath: string) {
   const content = await readFile(filepath, 'utf-8')
-  return JSON.parse(content)
+  return parseJSON(content)
 }
 
 export async function writeJSON(filepath: string, data: unknown) {
   const content = JSON.stringify(data, null, 2)
   await writeFile(filepath, content, 'utf-8')
+}
+
+export function parseJSON(value: string) {
+  try {
+    return JSON.parse(value)
+  }
+  catch {
+    return null
+  }
+}
+
+export function toUnix(value: number) {
+  return Math.floor(value / 1000)
+}
+
+export function parseDateToUnix(value?: string) {
+  if (!value)
+    return 0
+  const ts = Date.parse(value)
+  if (!Number.isFinite(ts))
+    return 0
+  return Math.floor(ts / 1000)
 }
 
 export function formatRelativeTime(date: number) {
@@ -42,4 +64,12 @@ export function formatRelativeTime(date: number) {
 
 export function quoteSqlString(value: string) {
   return `'${value.replaceAll('\'', '\'\'')}'`
+}
+
+export function normalizeInlineText(value: string) {
+  return value
+    .replace(/\r?\n/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }

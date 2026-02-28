@@ -9,8 +9,12 @@ Clean and remove AI chat with an interactive terminal UI.
 
 ```sh
 npx ai-chat-cleaner
-npx ai-chat-cleaner --agents codex
+npx ai-chat-cleaner --agent codex
 ```
+
+- Supported agents:
+  - Codex (`codex`)
+  - Claude Code (`claude-code`)
 
 > [!WARNING]
 > Please restart your AI coding tool after deletion.
@@ -20,10 +24,6 @@ npx ai-chat-cleaner --agents codex
 <p align='center'>
 <img src='./assets/screenshot.png' alt="screenshot" />
 </p>
-
-- Supported agents:
-  - Codex
-  - Claude Code
 
 ## Why ?
 

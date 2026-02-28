@@ -6,18 +6,18 @@ import c from 'ansis'
 import { promptGroupedMultiSelect } from '../prompts'
 import { formatRelativeTime } from '../utils'
 import { deleteThreads } from './delete'
-import { detectCodex } from './detect'
-import { groupCodexThreads } from './group'
+import { detectClaudeCode } from './detect'
+import { groupClaudeCodeThreads } from './group'
 
-export async function promptCodex(_options: CommandOptions) {
-  const { threads, globalState, sqlitePath } = await detectCodex()
+export async function promptClaudeCode(_options: CommandOptions) {
+  const { threads } = await detectClaudeCode()
 
   if (threads.length === 0) {
     p.outro(c.yellow('no threads found'))
     process.exit(0)
   }
 
-  const grouped = groupCodexThreads(threads)
+  const grouped = groupClaudeCodeThreads(threads)
   const resolved = await promptGroupedMultiSelect<ThreadData>(formatThreadGroupOptions(grouped))
 
   if (resolved === null || resolved.length === 0) {
@@ -35,11 +35,7 @@ export async function promptCodex(_options: CommandOptions) {
     process.exit(1)
   }
 
-  await deleteThreads({
-    threads: resolved,
-    globalState,
-    sqlitePath,
-  })
+  await deleteThreads(resolved)
 
   p.outro(`cleaned ${c.yellow`${resolved.length}`} threads`)
 }

@@ -1,5 +1,5 @@
 import { glob } from 'tinyglobby'
-import { exec, quoteSqlString } from '../utils'
+import { exec, parseJSON, quoteSqlString } from '../utils'
 
 export async function readSQLite<T = unknown>(filepath: string) {
   const { stdout } = await exec('sqlite3', [
@@ -7,7 +7,7 @@ export async function readSQLite<T = unknown>(filepath: string) {
     filepath,
     'SELECT * FROM threads;',
   ])
-  return JSON.parse(stdout.trim()) as T
+  return parseJSON(stdout.trim()) as T
 }
 
 export async function writeSQLite(filepath: string, ids: string[]) {

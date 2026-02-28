@@ -3,7 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import pLimit from 'p-limit'
 import { join } from 'pathe'
 import { rimraf } from 'rimraf'
-import { writeJSON } from '../utils'
+import { parseJSON, writeJSON } from '../utils'
 import { GLOBAL_STATE_PATH, HISTORY_FILE_PATH, SHELL_SNAPSHOTS_PATH } from './constants'
 import { writeSQLite } from './db'
 
@@ -39,7 +39,7 @@ async function updateHistory(path: string, ids: string[]) {
   const rows = (await readFile(path, 'utf8'))
     .split('\n')
     .filter(Boolean)
-    .map(line => JSON.parse(line))
+    .map(line => parseJSON(line))
     .filter(row => !remove.has(row?.session_id))
 
   const data = rows.length > 0
