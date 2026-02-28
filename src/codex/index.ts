@@ -8,10 +8,12 @@ import { deleteThreads } from './delete'
 import { detectCodex } from './detect'
 
 export async function promptCodex(_options: CommandOptions) {
-  const { threads, globalState } = await detectCodex()
+  const { threads, globalState, sqlitePath } = await detectCodex()
+
+  p.log.info(`found ${c.yellow`${threads.length}`} codex threads`)
 
   const resolved = await p.multiselect<ThreadData>({
-    message: 'Select Codex threads to clean',
+    message: 'select threads to clean',
     options: threads.map(thread => ({
       label: thread.title,
       hint: formatRelativeTime(thread.updated_at || thread.created_at),
@@ -25,5 +27,9 @@ export async function promptCodex(_options: CommandOptions) {
     return
   }
 
-  await deleteThreads(resolved, globalState)
+  await deleteThreads({
+    threads: resolved,
+    globalState,
+    sqlitePath,
+  })
 }

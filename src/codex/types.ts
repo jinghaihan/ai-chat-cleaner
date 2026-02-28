@@ -1,6 +1,7 @@
 export interface DetectResult {
   threads: ThreadData[]
   globalState: Record<'thread-titles', ThreadTitles>
+  sqlitePath: string | null
 }
 
 export interface ThreadTitles {

@@ -39,3 +39,7 @@ export function formatRelativeTime(date: number) {
     return rtf.format(months, 'month')
   return rtf.format(years, 'year')
 }
+
+export function quoteSqlString(value: string) {
+  return `'${value.replaceAll('\'', '\'\'')}'`
+}

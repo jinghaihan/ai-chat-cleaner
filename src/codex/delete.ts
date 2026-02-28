@@ -5,6 +5,7 @@ import { join } from 'pathe'
 import { rimraf } from 'rimraf'
 import { writeJSON } from '../utils'
 import { GLOBAL_STATE_PATH, HISTORY_FILE_PATH, SHELL_SNAPSHOTS_PATH } from './constants'
+import { writeSQLite } from './db'
 
 export async function deleteThread(thread: ThreadData) {
   const id = thread.id
@@ -12,7 +13,7 @@ export async function deleteThread(thread: ThreadData) {
   await rimraf(join(SHELL_SNAPSHOTS_PATH, `${id}.sh`))
 }
 
-export async function deleteThreads(threads: ThreadData[], globalState: DetectResult['globalState']) {
+export async function deleteThreads({ threads, globalState, sqlitePath }: DetectResult) {
   const threadIds = new Set(threads.map(thread => thread.id))
 
   const limit = pLimit(5)
@@ -21,6 +22,9 @@ export async function deleteThreads(threads: ThreadData[], globalState: DetectRe
   updateGlobalState(threadIds, globalState)
 
   await updateHistory(HISTORY_FILE_PATH, Array.from(threadIds))
+
+  if (sqlitePath)
+    await writeSQLite(sqlitePath, Array.from(threadIds))
 }
 
 async function updateGlobalState(threadIds: Set<string>, globalState: DetectResult['globalState']) {
