@@ -1,7 +1,7 @@
 {
   "name": "ai-chat-cleaner",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "packageManager": "pnpm@10.30.3",
   "description": "Clean and remove AI chat with an interactive terminal UI.",
   "author": "jinghaihan",
