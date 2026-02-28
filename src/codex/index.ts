@@ -10,7 +10,7 @@ import { detectCodex } from './detect'
 export async function promptCodex(_options: CommandOptions) {
   const { threads, globalState, sqlitePath } = await detectCodex()
 
-  p.log.info(`found ${c.yellow`${threads.length}`} codex threads`)
+  p.log.info(`found ${c.yellow`${threads.length}`} threads`)
 
   const resolved = await p.multiselect<ThreadData>({
     message: 'select threads to clean',
@@ -32,4 +32,6 @@ export async function promptCodex(_options: CommandOptions) {
     globalState,
     sqlitePath,
   })
+
+  p.log.info(`cleaned ${c.yellow`${resolved.length}`} threads`)
 }

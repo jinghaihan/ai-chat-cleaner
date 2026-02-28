@@ -12,15 +12,27 @@ export async function detectCodex(cwd = AGENTS.codex.path): Promise<DetectResult
   const threadTitles: ThreadTitles = globalState['thread-titles']
 
   const titles = threadTitles.titles
-  const order = threadTitles.order
 
   return {
-    threads: order.map((id) => {
-      const item = data.find(i => i.id === id)!
-      const title = titles[id] || item?.title || 'Untitled Thread'
-      return { ...item, title }
-    }),
+    threads: data
+      .filter(i => i.title || i.id in titles)
+      .sort((a, b) => a.updated_at > b.updated_at ? -1 : 1)
+      .map((thread) => {
+        const title = titles[thread.id] || normalizeTitle(thread)
+        return {
+          ...thread,
+          title,
+        }
+      }),
     globalState,
     sqlitePath,
   }
+}
+
+function normalizeTitle(thread: ThreadData) {
+  return thread.title
+    .replace(/\n/g, ' ')
+    .replace(thread.cwd, '')
+    .replace(AGENTS.codex.path, '')
+    .trim()
 }
