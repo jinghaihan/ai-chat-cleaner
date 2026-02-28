@@ -1,10 +1,10 @@
 import type { DetectResult, ThreadData, ThreadTitles } from './types'
-import { AGENTS } from '../constants'
+import { AGENTS_CONFIG } from '../constants'
 import { readJSON } from '../utils'
 import { GLOBAL_STATE_PATH } from './constants'
 import { getDatabasePath, readSQLite } from './db'
 
-export async function detectCodex(cwd = AGENTS.codex.path): Promise<DetectResult> {
+export async function detectCodex(cwd = AGENTS_CONFIG.codex.path): Promise<DetectResult> {
   const globalState = await readJSON(GLOBAL_STATE_PATH)
   const sqlitePath = await getDatabasePath(cwd)
   const data = sqlitePath ? await readSQLite<ThreadData[]>(sqlitePath) : []
@@ -33,6 +33,6 @@ function normalizeTitle(thread: ThreadData) {
   return thread.title
     .replace(/\n/g, ' ')
     .replace(thread.cwd, '')
-    .replace(AGENTS.codex.path, '')
+    .replace(AGENTS_CONFIG.codex.path, '')
     .trim()
 }

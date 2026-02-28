@@ -13,14 +13,26 @@ try {
 
   cli
     .command('', 'Clean and remove AI chat with an interactive terminal UI')
+    .option('-a, --agents <agent>', 'Agent to clean')
     .allowUnknownOptions()
     .action(async (options: Partial<CommandOptions>) => {
       p.intro(`${c.yellow`${NAME} `}${c.dim`v${VERSION}`}`)
 
       const config = await resolveConfig(options)
 
-      p.log.info(`start detecting ${c.yellow`Codex`} threads...`)
-      await promptCodex(config)
+      switch (config.agents) {
+        case 'codex': {
+          await promptCodex(config)
+          break
+        }
+        case 'claude-code': {
+          break
+        }
+        default: {
+          p.outro(c.red`unknown agent: ${config.agents}`)
+          process.exit(1)
+        }
+      }
     })
 
   cli.help()

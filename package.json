@@ -14,7 +14,13 @@
   "bugs": {
     "url": "https://github.com/jinghaihan/ai-chat-cleaner/issues"
   },
-  "keywords": [],
+  "keywords": [
+    "codex",
+    "claude",
+    "conversation",
+    "threads",
+    "cleaner"
+  ],
   "exports": {
     ".": "./dist/index.mjs",
     "./cli": "./dist/cli.mjs",

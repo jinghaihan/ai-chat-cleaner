@@ -9,6 +9,7 @@ Clean and remove AI chat with an interactive terminal UI.
 
 ```sh
 npx ai-chat-cleaner
+npx ai-chat-cleaner --agents codex
 ```
 
 > [!WARNING]
@@ -21,7 +22,8 @@ npx ai-chat-cleaner
 </p>
 
 - Supported agents:
-  - `codex`
+  - Codex
+  - Claude Code
 
 ## Why ?
 
@@ -32,6 +34,8 @@ But in practice, one conversation that goes in the wrong direction can keep affe
 ## Credit
 
 The terminal interaction mode is inspired by [taze](https://github.com/antfu-collective/taze).
+
+Claude Code cleanup implementation references [claude-chats-delete](https://github.com/ataleckij/claude-chats-delete).
 
 ## License
 
