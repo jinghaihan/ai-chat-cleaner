@@ -4,6 +4,7 @@ import process from 'node:process'
 import * as p from '@clack/prompts'
 import c from 'ansis'
 import { cac } from 'cac'
+import { promptCodex } from './codex'
 import { resolveConfig } from './config'
 import { NAME, VERSION } from './constants'
 
@@ -15,10 +16,8 @@ try {
     .allowUnknownOptions()
     .action(async (options: Partial<CommandOptions>) => {
       p.intro(`${c.yellow`${NAME} `}${c.dim`v${VERSION}`}`)
-
       const config = await resolveConfig(options)
-
-      console.log(config)
+      await promptCodex(config)
     })
 
   cli.help()

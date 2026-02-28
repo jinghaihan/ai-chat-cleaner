@@ -8,5 +8,5 @@ export type AgentType = typeof AGENTS_CHOICES[number]
 
 export interface AgentConfig {
   name: string
-  dir: string
+  path: string
 }

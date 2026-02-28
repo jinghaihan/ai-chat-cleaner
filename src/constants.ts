@@ -14,6 +14,6 @@ export const AGENTS_CHOICES = ['codex'] as const
 export const AGENTS: Record<AgentType, AgentConfig> = {
   codex: {
     name: 'codex',
-    dir: join(homedir(), '.codex'),
+    path: join(homedir(), '.codex'),
   },
 }
