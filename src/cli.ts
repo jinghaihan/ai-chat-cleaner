@@ -16,8 +16,12 @@ try {
     .allowUnknownOptions()
     .action(async (options: Partial<CommandOptions>) => {
       p.intro(`${c.yellow`${NAME} `}${c.dim`v${VERSION}`}`)
+
       const config = await resolveConfig(options)
+
       await promptCodex(config)
+
+      p.outro(c.green('done'))
     })
 
   cli.help()

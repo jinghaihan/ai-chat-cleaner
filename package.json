@@ -44,7 +44,9 @@
     "@clack/prompts": "catalog:prod",
     "ansis": "catalog:prod",
     "cac": "catalog:prod",
+    "p-limit": "catalog:prod",
     "pathe": "catalog:prod",
+    "rimraf": "catalog:prod",
     "tinyglobby": "catalog:prod"
   },
   "devDependencies": {

@@ -1,21 +1,17 @@
 import { execFile } from 'node:child_process'
-import { readFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { promisify } from 'node:util'
 
-const exec = promisify(execFile)
+export const exec = promisify(execFile)
 
 export async function readJSON(filepath: string) {
   const content = await readFile(filepath, 'utf-8')
   return JSON.parse(content)
 }
 
-export async function readSQLite<T = unknown>(filepath: string) {
-  const { stdout } = await exec('sqlite3', [
-    '-json',
-    filepath,
-    'SELECT * FROM threads;',
-  ])
-  return JSON.parse(stdout.trim()) as T
+export async function writeJSON(filepath: string, data: unknown) {
+  const content = JSON.stringify(data, null, 2)
+  await writeFile(filepath, content, 'utf-8')
 }
 
 export function formatRelativeTime(date: number) {

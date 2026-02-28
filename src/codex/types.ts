@@ -1,3 +1,8 @@
+export interface DetectResult {
+  threads: ThreadData[]
+  globalState: Record<'thread-titles', ThreadTitles>
+}
+
 export interface ThreadTitles {
   titles: Record<string, string>
   order: string[]
