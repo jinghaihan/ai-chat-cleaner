@@ -19,9 +19,8 @@ try {
 
       const config = await resolveConfig(options)
 
+      p.log.info(`start detecting ${c.yellow`Codex`} threads...`)
       await promptCodex(config)
-
-      p.outro(c.green('done'))
     })
 
   cli.help()

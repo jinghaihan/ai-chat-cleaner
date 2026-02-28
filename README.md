@@ -5,13 +5,25 @@
 [![JSDocs][jsdocs-src]][jsdocs-href]
 [![License][license-src]][license-href]
 
-## Usage
+Clean and remove AI chat with an interactive terminal UI.
 
-**No data**
+```sh
+npx ai-chat-cleaner
+```
 
-## Configuration
+- Supported agents:
+  - `codex`
 
-**No data**
+> [!WARNING]
+> Please restart your AI coding tool after deletion.
+>
+> It is recommended to clean history while Codex is not running, to avoid duplicate writes.
+
+## Why ?
+
+I am not entirely sure why `Codex` and `Claude Code` do not provide a way to delete a specific conversation history, perhaps to preserve context continuity.
+
+But in practice, one conversation that goes in the wrong direction can keep affecting later outputs, so I built this tool.
 
 ## License
 
