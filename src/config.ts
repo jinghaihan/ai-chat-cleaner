@@ -2,6 +2,7 @@ import type { AgentType, CommandOptions, Options } from './types'
 import process from 'node:process'
 import * as p from '@clack/prompts'
 import c from 'ansis'
+import tildify from 'tildify'
 import { AGENTS_CHOICES, AGENTS_CONFIG, DEFAULT_OPTIONS } from './constants'
 
 function normalizeConfig(options: Partial<CommandOptions>) {
@@ -33,7 +34,7 @@ async function resolveAgent(): Promise<AgentType> {
     options: AGENTS_CHOICES.map(agent => ({
       value: agent,
       label: AGENTS_CONFIG[agent].name,
-      hint: AGENTS_CONFIG[agent].path,
+      hint: tildify(AGENTS_CONFIG[agent].path),
     })),
   })
 

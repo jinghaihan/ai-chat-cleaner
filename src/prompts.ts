@@ -1,7 +1,7 @@
-import { homedir } from 'node:os'
 import process from 'node:process'
 import readline from 'node:readline'
 import c from 'ansis'
+import tildify from 'tildify'
 
 export interface GroupPromptItem<T> {
   id: string
@@ -221,7 +221,7 @@ function renderGroups<T>(state: PromptState, groups: Array<NormalizedGroup<T>>) 
     const mark = selected === 0 ? FIG_UNCHECK : selected === count ? FIG_CHECK : FIG_PARTIAL
     const countText = `${selected}/${count}`.padStart(countWidth, ' ')
     const label = fitText(group.label, labelWidth)
-    const path = group.path ? c.gray(tildifyPath(group.path)) : c.gray('(unknown cwd)')
+    const path = group.path ? c.gray(tildify(group.path)) : c.gray('(unknown cwd)')
 
     process.stdout.write(`${pointer} ${mark} ${label} ${c.red(countText)}   ${path}\n`)
   }
@@ -240,7 +240,7 @@ function renderItems<T>(state: PromptState, groups: Array<NormalizedGroup<T>>) {
   process.stdout.write(`${c.gray(`${Y('enter')} back  ${Y('esc')} back  ${Y('a')} toggle group`)}\n\n`)
   process.stdout.write(`${c.gray('selected')} ${c.red(`${selectedCount}/${totalCount}`)}\n`)
   process.stdout.write('\n')
-  process.stdout.write(`${c.green(group.label)} ${c.gray(group.path ? tildifyPath(group.path) : '(unknown cwd)')}\n\n`)
+  process.stdout.write(`${c.green(group.label)} ${c.gray(group.path ? tildify(group.path) : '(unknown cwd)')}\n\n`)
 
   const { start, end } = getRenderWindow(group.items.length, state.itemIndex, 8)
   if (start > 0)
@@ -356,15 +356,6 @@ function fitText(value: string, width: number) {
   if (width <= 1)
     return value.slice(0, width)
   return `${value.slice(0, width - 1)}…`
-}
-
-function tildifyPath(value: string) {
-  const home = homedir()
-  if (value === home)
-    return '~'
-  if (value.startsWith(`${home}/`))
-    return `~${value.slice(home.length)}`
-  return value
 }
 
 function clearScreen() {
