@@ -73,3 +73,34 @@ export function normalizeInlineText(value: string) {
     .replace(/\s+/g, ' ')
     .trim()
 }
+
+export function extractMessageText(content: unknown): string {
+  if (typeof content === 'string')
+    return content
+
+  if (!Array.isArray(content))
+    return ''
+
+  const texts: string[] = []
+  for (const item of content) {
+    if (typeof item === 'string') {
+      texts.push(item)
+      continue
+    }
+    if (!item || typeof item !== 'object')
+      continue
+    if (typeof item.text === 'string')
+      texts.push(item.text)
+    else if (typeof item.content === 'string')
+      texts.push(item.content)
+  }
+  return texts.join(' ')
+}
+
+export function isCommandTitle(title: string) {
+  return /^\/[\w-]+(?:\s+[\w-]+)?$/.test(title)
+}
+
+export function isUUID(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
+}
