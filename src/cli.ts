@@ -1,4 +1,3 @@
-import type { CAC } from 'cac'
 import type { CommandOptions } from './types'
 import process from 'node:process'
 import * as p from '@clack/prompts'
@@ -9,8 +8,8 @@ import { promptCodex } from './codex'
 import { resolveConfig } from './config'
 import { NAME, VERSION } from './constants'
 
-try {
-  const cli: CAC = cac(NAME)
+async function main() {
+  const cli = cac(NAME)
 
   cli
     .command('', 'Clean and remove AI chat with an interactive terminal UI')
@@ -39,9 +38,11 @@ try {
 
   cli.help()
   cli.version(VERSION)
-  cli.parse()
+  cli.parse(process.argv, { run: false })
+  await cli.runMatchedCommand()
 }
-catch (error) {
+
+main().catch((error) => {
   console.error(error)
   process.exit(1)
-}
+})
