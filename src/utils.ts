@@ -1,10 +1,13 @@
 import { execFile } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { promisify } from 'node:util'
 
 export const exec = promisify(execFile)
 
 export async function readJSON(filepath: string) {
+  if (!existsSync(filepath))
+    return
   const content = await readFile(filepath, 'utf-8')
   return parseJSON(content)
 }

@@ -9,7 +9,10 @@ export async function detectCodex(cwd = AGENTS_CONFIG.codex.path): Promise<Detec
   const sqlitePath = await getDatabasePath(cwd)
   const data = sqlitePath ? await readSQLite<ThreadData[]>(sqlitePath) : []
 
-  const threadTitles: ThreadTitles = globalState['thread-titles']
+  const threadTitles: ThreadTitles = globalState?.['thread-titles'] ?? {
+    titles: {},
+    order: [],
+  }
 
   const titles = threadTitles.titles
 

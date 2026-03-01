@@ -28,6 +28,8 @@ export async function deleteThreads({ threads, globalState, sqlitePath }: Detect
 }
 
 async function updateGlobalState(threadIds: Set<string>, globalState: DetectResult['globalState']) {
+  if (!globalState)
+    return
   for (const id of threadIds)
     delete globalState['thread-titles'].titles[id]
   globalState['thread-titles'].order = globalState['thread-titles'].order.filter(id => !threadIds.has(id))
