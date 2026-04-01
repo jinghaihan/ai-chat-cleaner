@@ -7,7 +7,7 @@ import { getDatabasePath, readSQLite } from './db'
 export async function detectCodex(cwd = AGENTS_CONFIG.codex.path): Promise<DetectResult> {
   const globalState = await readJSON(GLOBAL_STATE_PATH)
   const sqlitePath = await getDatabasePath(cwd)
-  const data = sqlitePath ? await readSQLite<ThreadData[]>(sqlitePath) : []
+  const data = sqlitePath ? await readSQLite(sqlitePath) : []
 
   const threadTitles: ThreadTitles = globalState?.['thread-titles'] ?? {
     titles: {},
