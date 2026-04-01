@@ -1,8 +1,9 @@
+import { x } from 'tinyexec'
 import { glob } from 'tinyglobby'
-import { exec, parseJSON, quoteSqlString } from '../utils'
+import { parseJSON, quoteSqlString } from '../utils'
 
 export async function readSQLite<T = unknown>(filepath: string) {
-  const { stdout } = await exec('sqlite3', [
+  const { stdout } = await x('sqlite3', [
     '-json',
     filepath,
     'SELECT * FROM threads;',
@@ -15,7 +16,7 @@ export async function writeSQLite(filepath: string, ids: string[]) {
     return
 
   const values = ids.map(quoteSqlString).join(', ')
-  await exec('sqlite3', [
+  await x('sqlite3', [
     filepath,
     `DELETE FROM threads WHERE id IN (${values});`,
   ])

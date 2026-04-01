@@ -55,6 +55,7 @@
     "pathe": "catalog:prod",
     "rimraf": "catalog:prod",
     "tildify": "catalog:prod",
+    "tinyexec": "catalog:prod",
     "tinyglobby": "catalog:prod"
   },
   "devDependencies": {
