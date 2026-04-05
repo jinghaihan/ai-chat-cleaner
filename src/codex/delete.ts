@@ -1,4 +1,5 @@
 import type { DetectResult, ThreadData } from './types'
+import { existsSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import pLimit from 'p-limit'
 import { join } from 'pathe'
@@ -37,6 +38,9 @@ async function updateGlobalState(threadIds: Set<string>, globalState: DetectResu
 }
 
 async function updateHistory(path: string, ids: string[]) {
+  if (!existsSync(path))
+    return
+
   const remove = new Set(ids)
   const rows = (await readFile(path, 'utf8'))
     .split('\n')
