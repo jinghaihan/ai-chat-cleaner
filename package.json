@@ -6,6 +6,7 @@
   "description": "Clean and remove AI chat with an interactive terminal UI.",
   "author": "jinghaihan",
   "license": "MIT",
+  "funding": "https://github.com/sponsors/jinghaihan",
   "homepage": "https://github.com/jinghaihan/ai-chat-cleaner#readme",
   "repository": {
     "type": "git",
