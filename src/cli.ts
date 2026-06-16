@@ -7,6 +7,7 @@ import { promptClaudeCode } from './claude-code'
 import { promptCodex } from './codex'
 import { resolveConfig } from './config'
 import { NAME, VERSION } from './constants'
+import { printIntro } from './intro'
 
 async function main() {
   const cli = cac(NAME)
@@ -16,7 +17,7 @@ async function main() {
     .option('--agent, -a <agent>', 'Agent to clean')
     .allowUnknownOptions()
     .action(async (options: Partial<CommandOptions>) => {
-      p.intro(`${c.yellow`${NAME} `}${c.dim`v${VERSION}`}`)
+      printIntro()
 
       const config = await resolveConfig(options)
 

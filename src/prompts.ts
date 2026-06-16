@@ -2,6 +2,7 @@ import process from 'node:process'
 import readline from 'node:readline'
 import c from 'ansis'
 import tildify from 'tildify'
+import { printIntro } from './intro'
 
 export interface GroupPromptItem<T> {
   id: string
@@ -69,6 +70,7 @@ export async function promptGroupedMultiSelect<T>(
 
   return await new Promise<T[] | null>((resolve) => {
     const previousRaw = Boolean(process.stdin.isRaw)
+    let done = false
 
     function cleanup() {
       process.stdin.off('keypress', onKeyPress)
@@ -76,14 +78,19 @@ export async function promptGroupedMultiSelect<T>(
         process.stdin.setRawMode(previousRaw)
       process.stdout.write('\x1B[?25h')
       clearScreen()
+      printIntro()
     }
 
     function onDone(value: T[] | null) {
+      done = true
       cleanup()
       resolve(value)
     }
 
     function onKeyPress(_: string, key: TerminalKey) {
+      if (done)
+        return
+
       if (key.ctrl && key.name === 'c') {
         onDone(null)
         return
@@ -95,6 +102,9 @@ export async function promptGroupedMultiSelect<T>(
       else {
         handleItemModeKey(state, normalizedGroups, key)
       }
+
+      if (done)
+        return
 
       render(state, normalizedGroups)
     }
@@ -359,5 +369,5 @@ function fitText(value: string, width: number) {
 }
 
 function clearScreen() {
-  process.stdout.write('\x1Bc')
+  process.stdout.write('\x1B[2J\x1B[H')
 }

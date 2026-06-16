@@ -29,6 +29,7 @@ function createThread(id: string, sqlitePaths: string[]): ThreadData {
     created_at: 1,
     updated_at: 1,
     source: 'vscode',
+    model_provider: 'openai',
     cwd: '/repo',
     title: id,
     sqlitePath: sqlitePaths[0]!,

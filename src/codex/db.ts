@@ -16,6 +16,7 @@ SELECT
   created_at,
   updated_at,
   source,
+  model_provider,
   cwd,
   CASE
     WHEN LENGTH(${normalizeTitleSql('title')}) <= ${THREAD_TITLE_MAX_LENGTH}
@@ -26,12 +27,23 @@ FROM threads;
 `.trim()
 
 export async function readSQLite(filepath: string): Promise<ThreadData[]> {
+  try {
+    return await readSQLiteReadonly(filepath)
+  }
+  catch (error) {
+    if (!isReadonlyOpenError(error))
+      throw error
+    return await readSQLiteReadonly(filepath, false)
+  }
+}
+
+async function readSQLiteReadonly(filepath: string, readonly = true): Promise<ThreadData[]> {
   const proc = x('sqlite3', [
     '-batch',
     '-noheader',
-    '-readonly',
     '-separator',
     SQLITE_COLUMN_SEPARATOR,
+    ...(readonly ? ['-readonly'] : []),
     filepath,
     THREAD_COLUMNS_SQL,
   ])
@@ -73,6 +85,10 @@ export async function readSQLite(filepath: string): Promise<ThreadData[]> {
   await waitForExit
 
   return rows
+}
+
+function isReadonlyOpenError(error: unknown) {
+  return error instanceof Error && error.message.includes('unable to open database file')
 }
 
 export async function writeSQLite(filepath: string, ids: string[]) {
@@ -117,7 +133,7 @@ function extractVersion(path: string): number {
 }
 
 function parseThreadRow(line: string, sqlitePath: string): ThreadData {
-  const [id, rollout_path, createdAt, updatedAt, source, cwd, title, ...rest] = line.split(SQLITE_COLUMN_SEPARATOR)
+  const [id, rollout_path, createdAt, updatedAt, source, modelProvider, cwd, title, ...rest] = line.split(SQLITE_COLUMN_SEPARATOR)
   if (rest.length > 0)
     throw new Error(`Unexpected sqlite3 row format: ${line}`)
 
@@ -127,6 +143,7 @@ function parseThreadRow(line: string, sqlitePath: string): ThreadData {
     created_at: parseInteger(createdAt, 'created_at'),
     updated_at: parseInteger(updatedAt, 'updated_at'),
     source: source as ThreadData['source'],
+    model_provider: modelProvider || 'unknown',
     cwd,
     title,
     sqlitePath,

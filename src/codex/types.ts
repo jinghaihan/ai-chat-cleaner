@@ -15,6 +15,7 @@ export interface ThreadData {
   created_at: number
   updated_at: number
   source: 'cli' | 'vscode'
+  model_provider: string
   cwd: string
   title: string
   sqlitePath: string
