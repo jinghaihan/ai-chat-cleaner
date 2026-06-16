@@ -1,5 +1,6 @@
 import type { ThreadData } from './types'
 import { createInterface } from 'node:readline'
+import { dirname } from 'pathe'
 import { x } from 'tinyexec'
 import { glob } from 'tinyglobby'
 import { quoteSqlString } from '../utils'
@@ -66,7 +67,7 @@ export async function readSQLite(filepath: string): Promise<ThreadData[]> {
   for await (const line of output) {
     if (!line)
       continue
-    rows.push(parseThreadRow(line))
+    rows.push(parseThreadRow(line, filepath))
   }
 
   await waitForExit
@@ -87,18 +88,24 @@ export async function writeSQLite(filepath: string, ids: string[]) {
   })
 }
 
-export async function getDatabasePath(cwd: string): Promise<string | null> {
-  const files = await glob('state_*.sqlite', {
+export async function getDatabasePaths(cwd: string): Promise<string[]> {
+  const files = await glob(['state_*.sqlite', 'sqlite/state_*.sqlite'], {
     cwd,
     absolute: true,
     onlyFiles: true,
   })
 
-  const latest = files
-    .filter(file => /state_\d+\.sqlite$/i.test(file))
-    .sort((a, b) => extractVersion(b) - extractVersion(a))[0]
+  const latestByDir = new Map<string, string>()
 
-  return latest || null
+  for (const file of files
+    .filter(file => /state_\d+\.sqlite$/i.test(file))
+    .sort((a, b) => extractVersion(b) - extractVersion(a))) {
+    const dir = dirname(file)
+    if (!latestByDir.has(dir))
+      latestByDir.set(dir, file)
+  }
+
+  return Array.from(latestByDir.values()).sort()
 }
 
 function extractVersion(path: string): number {
@@ -109,7 +116,7 @@ function extractVersion(path: string): number {
   return Number.isFinite(version) ? version : 0
 }
 
-function parseThreadRow(line: string): ThreadData {
+function parseThreadRow(line: string, sqlitePath: string): ThreadData {
   const [id, rollout_path, createdAt, updatedAt, source, cwd, title, ...rest] = line.split(SQLITE_COLUMN_SEPARATOR)
   if (rest.length > 0)
     throw new Error(`Unexpected sqlite3 row format: ${line}`)
@@ -122,6 +129,8 @@ function parseThreadRow(line: string): ThreadData {
     source: source as ThreadData['source'],
     cwd,
     title,
+    sqlitePath,
+    sqlitePaths: [sqlitePath],
   }
 }
 

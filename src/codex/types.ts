@@ -1,7 +1,7 @@
 export interface DetectResult {
   threads: ThreadData[]
   globalState?: Record<'thread-titles', ThreadTitles | undefined>
-  sqlitePath: string | null
+  sqlitePaths: string[]
 }
 
 export interface ThreadTitles {
@@ -17,6 +17,8 @@ export interface ThreadData {
   source: 'cli' | 'vscode'
   cwd: string
   title: string
+  sqlitePath: string
+  sqlitePaths: string[]
 }
 
 export interface ThreadGroup {

@@ -14,7 +14,7 @@ export async function deleteThread(thread: ThreadData) {
   await rimraf(join(SHELL_SNAPSHOTS_PATH, `${id}.sh`))
 }
 
-export async function deleteThreads({ threads, globalState, sqlitePath }: DetectResult) {
+export async function deleteThreads({ threads, globalState }: DetectResult) {
   const threadIds = new Set(threads.map(thread => thread.id))
 
   const limit = pLimit(5)
@@ -24,8 +24,22 @@ export async function deleteThreads({ threads, globalState, sqlitePath }: Detect
 
   await updateHistory(HISTORY_FILE_PATH, Array.from(threadIds))
 
-  if (sqlitePath)
-    await writeSQLite(sqlitePath, Array.from(threadIds))
+  const idsBySqlitePath = groupThreadIdsBySqlitePath(threads)
+  await Promise.all(Array.from(idsBySqlitePath, ([sqlitePath, ids]) => writeSQLite(sqlitePath, Array.from(ids))))
+}
+
+function groupThreadIdsBySqlitePath(threads: ThreadData[]) {
+  const grouped = new Map<string, Set<string>>()
+
+  for (const thread of threads) {
+    for (const sqlitePath of thread.sqlitePaths) {
+      const ids = grouped.get(sqlitePath) ?? new Set<string>()
+      ids.add(thread.id)
+      grouped.set(sqlitePath, ids)
+    }
+  }
+
+  return grouped
 }
 
 async function updateGlobalState(threadIds: Set<string>, globalState: DetectResult['globalState']) {
