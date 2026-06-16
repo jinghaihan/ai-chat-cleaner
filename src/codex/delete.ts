@@ -5,7 +5,7 @@ import pLimit from 'p-limit'
 import { join } from 'pathe'
 import { rimraf } from 'rimraf'
 import { parseJSON, writeJSON } from '../utils'
-import { GLOBAL_STATE_PATH, HISTORY_FILE_PATH, SHELL_SNAPSHOTS_PATH } from './constants'
+import { GLOBAL_STATE_PATH, HISTORY_FILE_PATH, SESSION_INDEX_PATH, SHELL_SNAPSHOTS_PATH } from './constants'
 import { writeSQLite } from './db'
 
 export async function deleteThread(thread: ThreadData) {
@@ -20,15 +20,16 @@ export async function deleteThreads({ threads, globalState }: DetectResult) {
   const limit = pLimit(5)
   await Promise.all(threads.map(thread => limit(() => deleteThread(thread))))
 
-  updateGlobalState(threadIds, globalState)
+  await updateGlobalState(threadIds, globalState)
 
   await updateHistory(HISTORY_FILE_PATH, Array.from(threadIds))
+  await updateSessionIndex(SESSION_INDEX_PATH, threadIds)
 
   const idsBySqlitePath = groupThreadIdsBySqlitePath(threads)
   await Promise.all(Array.from(idsBySqlitePath, ([sqlitePath, ids]) => writeSQLite(sqlitePath, Array.from(ids))))
 }
 
-function groupThreadIdsBySqlitePath(threads: ThreadData[]) {
+export function groupThreadIdsBySqlitePath(threads: ThreadData[]) {
   const grouped = new Map<string, Set<string>>()
 
   for (const thread of threads) {
@@ -66,5 +67,22 @@ async function updateHistory(path: string, ids: string[]) {
     ? `${rows.map(row => JSON.stringify(row)).join('\n')}\n`
     : ''
 
-  await writeFile(HISTORY_FILE_PATH, data, 'utf-8')
+  await writeFile(path, data, 'utf-8')
+}
+
+async function updateSessionIndex(path: string, threadIds: Set<string>) {
+  if (!existsSync(path))
+    return
+
+  const rows = (await readFile(path, 'utf8'))
+    .split('\n')
+    .filter(Boolean)
+    .map(line => parseJSON(line))
+    .filter(row => !(row && typeof row === 'object' && 'id' in row && typeof row.id === 'string' && threadIds.has(row.id)))
+
+  const data = rows.length > 0
+    ? `${rows.map(row => JSON.stringify(row)).join('\n')}\n`
+    : ''
+
+  await writeFile(path, data, 'utf-8')
 }
