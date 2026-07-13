@@ -3,7 +3,6 @@ import { createInterface } from 'node:readline'
 import { dirname } from 'pathe'
 import { x } from 'tinyexec'
 import { glob } from 'tinyglobby'
-import { quoteSqlString } from '../utils'
 
 const SQLITE_COLUMN_SEPARATOR = '\u001F'
 const THREAD_TITLE_MAX_LENGTH = 240
@@ -89,19 +88,6 @@ async function readSQLiteReadonly(filepath: string, readonly = true): Promise<Th
 
 function isReadonlyOpenError(error: unknown) {
   return error instanceof Error && error.message.includes('unable to open database file')
-}
-
-export async function writeSQLite(filepath: string, ids: string[]) {
-  if (ids.length === 0)
-    return
-
-  const values = ids.map(quoteSqlString).join(', ')
-  await x('sqlite3', [
-    filepath,
-    `DELETE FROM threads WHERE id IN (${values});`,
-  ], {
-    throwOnError: true,
-  })
 }
 
 export async function getDatabasePaths(cwd: string): Promise<string[]> {

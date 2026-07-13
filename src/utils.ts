@@ -61,10 +61,6 @@ export function formatRelativeTime(date: number) {
   return rtf.format(years, 'year')
 }
 
-export function quoteSqlString(value: string) {
-  return `'${value.replaceAll('\'', '\'\'')}'`
-}
-
 export function normalizeInlineText(value: string) {
   return value
     .replace(/\r?\n/g, ' ')

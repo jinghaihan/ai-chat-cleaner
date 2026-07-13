@@ -1,6 +1,5 @@
-import type { ThreadData } from '../src/codex/types'
 import { describe, expect, it } from 'vitest'
-import { groupThreadIdsBySqlitePath } from '../src/codex/delete'
+import { findCodexExecutable, getCodexDeleteArgs } from '../src/codex/cli'
 
 describe('should', () => {
   it('exported', () => {
@@ -8,31 +7,21 @@ describe('should', () => {
   })
 })
 
-describe('codex sqlite deletion', () => {
-  it('groups thread ids by every sqlite source path', () => {
-    const grouped = groupThreadIdsBySqlitePath([
-      createThread('thread-1', ['/codex/state_5.sqlite', '/codex/sqlite/state_5.sqlite']),
-      createThread('thread-2', ['/codex/sqlite/state_5.sqlite']),
-    ])
+describe('codex CLI deletion', () => {
+  it('uses the official forced deletion command', () => {
+    expect(getCodexDeleteArgs('thread-1')).toEqual(['delete', '--force', 'thread-1'])
+  })
 
-    expect(Object.fromEntries(Array.from(grouped, ([path, ids]) => [path, Array.from(ids)]))).toEqual({
-      '/codex/state_5.sqlite': ['thread-1'],
-      '/codex/sqlite/state_5.sqlite': ['thread-1', 'thread-2'],
+  it('chooses the first executable that supports forced deletion', async () => {
+    const probe = async (executable: string) => ({
+      exitCode: executable === 'desktop-codex' ? 0 : 1,
+      stdout: executable === 'desktop-codex' ? '  --force\n' : '',
     })
+
+    await expect(
+      findCodexExecutable(['missing-codex', 'desktop-codex'], probe),
+    )
+      .resolves
+      .toBe('desktop-codex')
   })
 })
-
-function createThread(id: string, sqlitePaths: string[]): ThreadData {
-  return {
-    id,
-    rollout_path: `/sessions/${id}.jsonl`,
-    created_at: 1,
-    updated_at: 1,
-    source: 'vscode',
-    model_provider: 'openai',
-    cwd: '/repo',
-    title: id,
-    sqlitePath: sqlitePaths[0]!,
-    sqlitePaths,
-  }
-}

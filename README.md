@@ -19,17 +19,35 @@ npx ai-chat-cleaner --agent codex
 > [!WARNING]
 > Please restart your AI coding tool after deletion.
 >
-> It is recommended to clean history while Codex is not running, to avoid duplicate writes.
+> It is recommended to clean history while Codex is not running, to avoid concurrent writes.
 
 <p align='center'>
 <img src='./assets/screenshot.png' alt="screenshot" />
 </p>
 
-## Why ?
+## Codex cleanup
 
-I am not entirely sure why `Codex` and `Claude Code` do not provide a way to delete a specific conversation history, perhaps to preserve context continuity.
+Codex conversations are deleted through the official `codex delete --force` command. The CLI keeps the existing interactive selection UI, but no longer edits Codex SQLite or JSONL files directly.
 
-But in practice, one conversation that goes in the wrong direction can keep affecting later outputs, so I built this tool.
+The command is resolved in this order:
+
+- `AI_CHAT_CLEANER_CODEX_BIN`, when set
+- The Codex binary bundled with the macOS ChatGPT/Codex desktop app
+- `codex` on `PATH`
+
+The selected executable must support `codex delete --force`. Update the Codex desktop app or install the Codex CLI if no compatible executable is found.
+
+This is a **local cleanup**: it removes the Codex session from this computer. It does not delete the conversation from your ChatGPT account.
+
+## Delete Codex chats from your ChatGPT account
+
+To delete a Codex chat from your account, use the official ChatGPT desktop app flow:
+
+1. Archive the chat from the Codex history sidebar.
+2. Open **Settings** → **Archived chats**.
+3. Delete the archived chat.
+
+OpenAI schedules deleted chats for permanent deletion from its systems within 30 days, subject to its stated exceptions. See [How to archive and delete Codex chats in the ChatGPT app](https://help.openai.com/en/articles/20001333-how-to-archive-and-delete-chats-in-codex).
 
 ## Credit
 

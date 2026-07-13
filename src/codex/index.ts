@@ -12,7 +12,7 @@ import { groupCodexThreads } from './group'
 export async function promptCodex(_options: CommandOptions) {
   const spinner = p.spinner()
   spinner.start('detecting codex threads...')
-  const { threads, globalState, sqlitePaths } = await detectCodex()
+  const { threads } = await detectCodex()
   spinner.stop(`detected ${c.yellow`${threads.length}`} threads`)
 
   if (threads.length === 0) {
@@ -45,11 +45,7 @@ export async function promptCodex(_options: CommandOptions) {
     process.exit(1)
   }
 
-  await deleteThreads({
-    threads: resolved,
-    globalState,
-    sqlitePaths,
-  })
+  await deleteThreads(resolved)
 
   p.outro(`cleaned ${c.yellow`${resolved.length}`} threads`)
 }
