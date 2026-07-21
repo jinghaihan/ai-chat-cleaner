@@ -21,18 +21,34 @@ export async function detectCodex(cwd = AGENTS_CONFIG.codex.path): Promise<Detec
 
   return {
     threads: data
-      .filter(i => i.title || i.id in legacyTitles || i.id in sessionIndexTitles)
-      .sort((a, b) => a.updated_at > b.updated_at ? -1 : 1)
       .map((thread) => {
-        const title = normalizeTitle(thread) || sessionIndexTitles[thread.id] || legacyTitles[thread.id]
+        const title = resolveThreadTitle(
+          thread,
+          sessionIndexTitles[thread.id],
+          legacyTitles[thread.id],
+        )
         return {
           ...thread,
           title,
         }
-      }),
+      })
+      .filter(thread => thread.title)
+      .sort((a, b) => a.updated_at > b.updated_at ? -1 : 1),
     globalState,
     sqlitePaths,
   }
+}
+
+export function resolveThreadTitle(
+  thread: ThreadData,
+  sessionIndexTitle?: string,
+  legacyTitle?: string,
+) {
+  // Codex's sidebar title is the latest thread_name appended to session_index.jsonl.
+  // SQLite can still contain the initial user prompt after that display name changes.
+  return sessionIndexTitle?.trim()
+    || legacyTitle?.trim()
+    || normalizeTitle(thread)
 }
 
 function mergeThreads(threads: ThreadData[]): ThreadData[] {
