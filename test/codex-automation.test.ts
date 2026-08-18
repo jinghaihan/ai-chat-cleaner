@@ -1,7 +1,8 @@
+import { execFile, spawnSync } from 'node:child_process'
 import { mkdir, mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { x } from 'tinyexec'
+import { promisify } from 'node:util'
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   deleteAutomationRuns,
@@ -11,12 +12,14 @@ import {
 import { detectCodex } from '../src/codex/detect'
 
 const temporaryDirectories: string[] = []
+const execFileAsync = promisify(execFile)
+const hasSqlite3 = spawnSync('sqlite3', ['-version'], { windowsHide: true }).status === 0
 
 afterEach(async () => {
   await Promise.all(temporaryDirectories.splice(0).map(path => rm(path, { recursive: true, force: true })))
 })
 
-describe('codex Desktop automation runs', () => {
+describe.skipIf(!hasSqlite3)('codex Desktop automation runs', () => {
   it('discovers and reads visible automation runs', async () => {
     const { codexHome, databasePath } = await createCodexHome()
     await seedAutomationRuns(databasePath)
@@ -91,7 +94,7 @@ async function createCodexHome() {
 }
 
 async function seedAutomationRuns(databasePath: string) {
-  await x('sqlite3', [databasePath, `
+  await execFileAsync('sqlite3', [databasePath, `
 CREATE TABLE automations (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL
@@ -112,5 +115,5 @@ INSERT INTO automation_runs (
   ('run-1', 'daily-inspection', 'PENDING_REVIEW', 'Old title', '/workspace/project', 100000, 200000),
   ('run-2', 'daily-inspection', 'ACCEPTED', 'Old title', '/workspace/project', 300000, 400000),
   ('hidden-run', 'daily-inspection', 'DELETED', 'Old title', '/workspace/project', 500000, 600000);
-  `], { throwOnError: true })
+  `])
 }
