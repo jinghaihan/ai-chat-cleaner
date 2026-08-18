@@ -27,7 +27,9 @@ npx ai-chat-cleaner --agent codex
 
 ## Codex cleanup
 
-Codex conversations are deleted through the official `codex delete --force` command. The CLI keeps the existing interactive selection UI, but no longer edits Codex SQLite or JSONL files directly.
+Codex conversations are deleted through the official `codex delete --force` command. Codex Desktop stores scheduled automation runs in a separate SQLite database, so the cleaner also removes selected entries from its `automation_runs` table. This includes orphaned automation runs whose underlying conversation was already deleted.
+
+Quit Codex before cleaning. Restart it after deletion so the sidebar reloads the updated automation run index.
 
 The command is resolved in this order:
 
@@ -37,7 +39,7 @@ The command is resolved in this order:
 
 The selected executable must support `codex delete --force`. Update the Codex desktop app or install the Codex CLI if no compatible executable is found.
 
-This is a **local cleanup**: it removes the Codex session from this computer. It does not delete the conversation from your ChatGPT account.
+This is a **local cleanup**: it removes the Codex session and selected desktop automation run history from this computer. It does not delete the automation definition or the conversation from your ChatGPT account.
 
 ## Delete Codex chats from your ChatGPT account
 
