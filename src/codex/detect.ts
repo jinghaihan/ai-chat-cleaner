@@ -3,13 +3,54 @@ import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { AGENTS_CONFIG } from '../constants'
 import { parseJSON, readJSON } from '../utils'
+import { getAutomationDatabasePaths, readAutomationRuns } from './automation'
+import { getCatalogDatabasePaths, readCatalogEntries } from './catalog'
 import { GLOBAL_STATE_PATH, SESSION_INDEX_PATH } from './constants'
 import { getDatabasePaths, readSQLite } from './db'
 
 export async function detectCodex(cwd = AGENTS_CONFIG.codex.path): Promise<DetectResult> {
   const globalState = await readJSON(GLOBAL_STATE_PATH)
   const sqlitePaths = await getDatabasePaths(cwd)
+  const automationDatabasePaths = await getAutomationDatabasePaths(cwd)
+  const catalogDatabasePaths = await getCatalogDatabasePaths(cwd)
   const data = mergeThreads((await Promise.all(sqlitePaths.map(readSQLite))).flat())
+  const threadIds = new Set(data.map(thread => thread.id))
+  const orphanedCatalogEntries: ThreadData[] = mergeCatalogEntries(
+    (await Promise.all(catalogDatabasePaths.map(readCatalogEntries))).flat(),
+  )
+    .filter(entry => !threadIds.has(entry.id))
+    .map(entry => ({
+      id: entry.id,
+      rollout_path: '',
+      created_at: entry.created_at,
+      updated_at: entry.updated_at,
+      source: 'catalog' as const,
+      model_provider: entry.model_provider,
+      cwd: entry.cwd,
+      title: entry.title,
+      sqlitePath: entry.sqlitePath,
+      sqlitePaths: [entry.sqlitePath],
+      isCatalogOnly: true,
+    }))
+  const catalogEntryIds = new Set(orphanedCatalogEntries.map(entry => entry.id))
+  const orphanedAutomationRuns: ThreadData[] = mergeAutomationRuns(
+    (await Promise.all(automationDatabasePaths.map(readAutomationRuns))).flat(),
+  )
+    .filter(run => !threadIds.has(run.id) && !catalogEntryIds.has(run.id))
+    .map(run => ({
+      id: run.id,
+      rollout_path: '',
+      created_at: run.created_at,
+      updated_at: run.updated_at,
+      source: 'automation' as const,
+      model_provider: 'openai',
+      cwd: run.cwd,
+      title: run.title,
+      sqlitePath: run.sqlitePath,
+      sqlitePaths: [run.sqlitePath],
+      isAutomationRunOnly: true,
+      automationRunStatus: run.status,
+    }))
   const sessionIndexTitles = await readSessionIndexTitles()
 
   const threadTitles: ThreadTitles = globalState?.['thread-titles'] ?? {
@@ -20,13 +61,15 @@ export async function detectCodex(cwd = AGENTS_CONFIG.codex.path): Promise<Detec
   const legacyTitles = threadTitles.titles
 
   return {
-    threads: data
+    threads: [...data, ...orphanedCatalogEntries, ...orphanedAutomationRuns]
       .map((thread) => {
-        const title = resolveThreadTitle(
-          thread,
-          sessionIndexTitles[thread.id],
-          legacyTitles[thread.id],
-        )
+        const title = thread.isAutomationRunOnly || thread.isCatalogOnly
+          ? thread.title
+          : resolveThreadTitle(
+              thread,
+              sessionIndexTitles[thread.id],
+              legacyTitles[thread.id],
+            )
         return {
           ...thread,
           title,
@@ -37,6 +80,30 @@ export async function detectCodex(cwd = AGENTS_CONFIG.codex.path): Promise<Detec
     globalState,
     sqlitePaths,
   }
+}
+
+function mergeCatalogEntries(entries: Awaited<ReturnType<typeof readCatalogEntries>>): Awaited<ReturnType<typeof readCatalogEntries>> {
+  const merged = new Map<string, (typeof entries)[number]>()
+
+  for (const entry of entries) {
+    const current = merged.get(entry.id)
+    if (!current || entry.updated_at >= current.updated_at)
+      merged.set(entry.id, entry)
+  }
+
+  return Array.from(merged.values())
+}
+
+function mergeAutomationRuns(runs: Awaited<ReturnType<typeof readAutomationRuns>>): Awaited<ReturnType<typeof readAutomationRuns>> {
+  const merged = new Map<string, (typeof runs)[number]>()
+
+  for (const run of runs) {
+    const current = merged.get(run.id)
+    if (!current || run.updated_at >= current.updated_at)
+      merged.set(run.id, run)
+  }
+
+  return Array.from(merged.values())
 }
 
 export function resolveThreadTitle(

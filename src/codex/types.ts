@@ -14,12 +14,36 @@ export interface ThreadData {
   rollout_path: string
   created_at: number
   updated_at: number
-  source: 'cli' | 'vscode'
+  source: 'automation' | 'catalog' | 'cli' | 'unknown' | 'vscode'
   model_provider: string
   cwd: string
   title: string
   sqlitePath: string
   sqlitePaths: string[]
+  isAutomationRunOnly?: boolean
+  isCatalogOnly?: boolean
+  automationRunStatus?: string
+}
+
+export interface AutomationRunData {
+  id: string
+  created_at: number
+  updated_at: number
+  cwd: string
+  title: string
+  status: string
+  sqlitePath: string
+}
+
+export interface CatalogEntryData {
+  id: string
+  created_at: number
+  updated_at: number
+  cwd: string
+  title: string
+  source: string
+  model_provider: string
+  sqlitePath: string
 }
 
 export interface ThreadGroup {

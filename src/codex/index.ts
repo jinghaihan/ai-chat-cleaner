@@ -126,5 +126,11 @@ function formatThreadGroupOptions(grouped: ThreadGroup[]) {
 function formatThreadHint(thread: ThreadData) {
   const updatedAt = thread.updated_at || thread.created_at
   const createdAt = thread.created_at || updatedAt
+  if (thread.isAutomationRunOnly) {
+    const status = thread.automationRunStatus?.toLowerCase().replaceAll('_', ' ') ?? 'unknown'
+    return `orphaned automation run · ${status} · updated ${formatRelativeTime(updatedAt)}`
+  }
+  if (thread.isCatalogOnly)
+    return `orphaned desktop task · updated ${formatRelativeTime(updatedAt)}`
   return `${thread.model_provider} · updated ${formatRelativeTime(updatedAt)} · created ${formatRelativeTime(createdAt)}`
 }
