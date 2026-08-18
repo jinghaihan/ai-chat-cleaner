@@ -130,5 +130,7 @@ function formatThreadHint(thread: ThreadData) {
     const status = thread.automationRunStatus?.toLowerCase().replaceAll('_', ' ') ?? 'unknown'
     return `orphaned automation run · ${status} · updated ${formatRelativeTime(updatedAt)}`
   }
+  if (thread.isCatalogOnly)
+    return `orphaned desktop task · updated ${formatRelativeTime(updatedAt)}`
   return `${thread.model_provider} · updated ${formatRelativeTime(updatedAt)} · created ${formatRelativeTime(createdAt)}`
 }
