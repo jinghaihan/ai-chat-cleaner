@@ -18,7 +18,15 @@ SELECT
   COALESCE(cwd, ''),
   REPLACE(REPLACE(REPLACE(display_title, CHAR(31), ' '), CHAR(13), ' '), CHAR(10), ' '),
   COALESCE(source_kind, 'unknown'),
-  COALESCE(model_provider, 'unknown')
+  COALESCE(
+    NULLIF(TRIM(model_provider), ''),
+    CASE
+      -- ChatGPT records are OpenAI records, but the catalog does not
+      -- persist a model_provider value for them.
+      WHEN source_kind = 'chatgpt' THEN 'openai'
+      ELSE 'unknown'
+    END
+  )
 FROM local_thread_catalog
 WHERE missing_candidate = 0;
 `.trim()

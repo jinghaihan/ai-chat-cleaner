@@ -113,7 +113,7 @@ function formatThreadGroupOptions(grouped: ThreadGroup[]) {
   return grouped.map(group => ({
     id: group.id,
     label: group.label,
-    path: group.cwd,
+    path: group.path ?? group.cwd,
     items: group.threads.map(thread => ({
       id: thread.id,
       label: thread.title,

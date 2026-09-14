@@ -15,6 +15,7 @@ export interface ThreadData {
   created_at: number
   updated_at: number
   source: 'automation' | 'catalog' | 'cli' | 'unknown' | 'vscode'
+  sourceKind?: string
   model_provider: string
   cwd: string
   title: string
@@ -50,6 +51,7 @@ export interface ThreadGroup {
   id: string
   label: string
   cwd: string
+  path?: string
   threads: ThreadData[]
   updatedAt: number
 }

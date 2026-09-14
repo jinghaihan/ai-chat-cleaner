@@ -49,6 +49,24 @@ describe.skipIf(!hasSqlite3)('codex Desktop thread catalog', () => {
     ])
   })
 
+  it('treats ChatGPT catalog records without a provider as OpenAI', async () => {
+    const { catalogPath } = await createCodexHome()
+    await seedChatgptCatalogWithoutProvider(catalogPath)
+
+    await expect(readCatalogEntries(catalogPath)).resolves.toEqual([
+      {
+        id: 'chatgpt-only',
+        created_at: 100,
+        updated_at: 250,
+        cwd: '/workspace/project',
+        title: 'Example ChatGPT task',
+        source: 'chatgpt',
+        model_provider: 'openai',
+        sqlitePath: catalogPath,
+      },
+    ])
+  })
+
   it('deletes selected catalog records and their secondary indexes', async () => {
     const { codexHome, catalogPath } = await createCodexHome()
     await seedCatalog(catalogPath)
@@ -144,6 +162,27 @@ INSERT INTO local_thread_catalog VALUES
   ('local', 'hidden-entry', 'Hidden task', 500, 600, '/workspace/project', 'vscode', 'openai', 1, 600);
 INSERT INTO thread_timeline_ledger VALUES ('local', 'catalog-only', 1, 'record-1', '{}');
 INSERT INTO inbox_items VALUES ('inbox-1', 'catalog-only');
+  `])
+}
+
+async function seedChatgptCatalogWithoutProvider(databasePath: string) {
+  await execFileAsync('sqlite3', [databasePath, `
+CREATE TABLE local_thread_catalog (
+  host_id TEXT NOT NULL,
+  thread_id TEXT NOT NULL,
+  display_title TEXT NOT NULL,
+  source_created_at REAL NOT NULL,
+  source_updated_at REAL NOT NULL,
+  cwd TEXT NOT NULL,
+  source_kind TEXT NOT NULL,
+  model_provider TEXT,
+  missing_candidate INTEGER NOT NULL DEFAULT 0,
+  source_recency_at REAL NOT NULL DEFAULT 0,
+  PRIMARY KEY (host_id, thread_id)
+);
+INSERT INTO local_thread_catalog VALUES
+  ('local', 'chatgpt-only', 'Example ChatGPT task', 100, 200,
+   '/workspace/project', 'chatgpt', NULL, 0, 250);
   `])
 }
 

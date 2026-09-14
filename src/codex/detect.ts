@@ -25,6 +25,7 @@ export async function detectCodex(cwd = AGENTS_CONFIG.codex.path): Promise<Detec
       created_at: entry.created_at,
       updated_at: entry.updated_at,
       source: 'catalog' as const,
+      sourceKind: entry.source,
       model_provider: entry.model_provider,
       cwd: entry.cwd,
       title: entry.title,

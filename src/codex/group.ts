@@ -6,8 +6,9 @@ export function groupCodexThreads(threads: ThreadData[]): ThreadGroup[] {
 
   for (const thread of threads) {
     const cwd = thread.cwd || ''
-    const id = cwd || '(unknown)'
-    const label = cwd ? basename(cwd) : '(unknown)'
+    const isChatgptWeb = !cwd && thread.sourceKind === 'chatgpt'
+    const id = cwd || (isChatgptWeb ? '(chatgpt)' : '(unknown)')
+    const label = cwd ? basename(cwd) : isChatgptWeb ? 'ChatGPT web' : '(unknown)'
 
     const group = grouped.get(id)
     if (group) {
@@ -20,6 +21,7 @@ export function groupCodexThreads(threads: ThreadData[]): ThreadGroup[] {
       id,
       label,
       cwd,
+      path: isChatgptWeb ? '(ChatGPT web)' : undefined,
       threads: [thread],
       updatedAt: thread.updated_at || thread.created_at || 0,
     })
