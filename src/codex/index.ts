@@ -3,9 +3,11 @@ import type { ThreadData, ThreadGroup } from './types'
 import process from 'node:process'
 import * as p from '@clack/prompts'
 import c from 'ansis'
+import { AGENTS_CONFIG } from '../constants'
 import { promptGroupedMultiSelect } from '../prompts'
-import { formatRelativeTime } from '../utils'
+import { formatRelativeTime, isMacOS } from '../utils'
 import { deleteThreads } from './delete'
+import { hasActiveThreadLocks, isCodexDesktopRunning, quitCodexDesktop, reopenCodexDesktop, waitForCodexDesktopExit } from './desktop'
 import { detectCodex } from './detect'
 import { groupCodexThreads } from './group'
 
@@ -45,7 +47,46 @@ export async function promptCodex(_options: CommandOptions) {
     process.exit(1)
   }
 
-  await deleteThreads(resolved)
+  const localThreads = resolved.filter(thread => !thread.isAutomationRunOnly && !thread.isCatalogOnly)
+  let reopenDesktop = false
+
+  try {
+    if (localThreads.length > 0 && isMacOS) {
+      const hasLocks = await hasActiveThreadLocks(
+        localThreads.map(thread => thread.id),
+        AGENTS_CONFIG.codex.path,
+      )
+
+      if (hasLocks && await isCodexDesktopRunning()) {
+        const closeAndReopen = await p.confirm({
+          message: 'ChatGPT/Codex is using the selected sessions. Quit it temporarily, delete them, and reopen it automatically?',
+          initialValue: true,
+        })
+
+        if (p.isCancel(closeAndReopen) || !closeAndReopen) {
+          p.outro(c.yellow('Please quit ChatGPT/Codex and run ai-chat-cleaner again.'))
+          process.exit(1)
+        }
+
+        await quitCodexDesktop()
+        reopenDesktop = true
+        await waitForCodexDesktopExit(
+          localThreads.map(thread => thread.id),
+          AGENTS_CONFIG.codex.path,
+        )
+      }
+    }
+    await deleteThreads(resolved)
+  }
+  catch {
+    p.outro(c.yellow('Deletion failed. ChatGPT/Codex may still be using the selected sessions. Please quit the app and run ai-chat-cleaner again.'))
+    process.exitCode = 1
+    return
+  }
+  finally {
+    if (reopenDesktop)
+      await reopenCodexDesktop()
+  }
 
   p.outro(`cleaned ${c.yellow`${resolved.length}`} threads`)
 }

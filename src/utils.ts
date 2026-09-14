@@ -1,5 +1,8 @@
 import { existsSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
+import process from 'node:process'
+
+export const isMacOS = process.platform === 'darwin'
 
 export async function readJSON(filepath: string) {
   if (!existsSync(filepath))
