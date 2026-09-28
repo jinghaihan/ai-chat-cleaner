@@ -31,6 +31,8 @@ Codex conversations are deleted through the official `codex delete --force` comm
 
 Quit Codex before cleaning. Restart it after deletion so the sidebar reloads the updated desktop task indexes.
 
+If a forked chat still uses a selected chat's paginated history, the cleaner asks whether to delete the fork too or skip the affected selected chats. It checks these references before deleting anything and removes dependent chats first.
+
 The command is resolved in this order:
 
 - `AI_CHAT_CLEANER_CODEX_BIN`, when set

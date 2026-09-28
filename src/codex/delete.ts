@@ -4,12 +4,12 @@ import { deleteAutomationRuns } from './automation'
 import { deleteCatalogEntries } from './catalog'
 import { deleteCodexThreads } from './cli'
 
-export async function deleteThreads(threads: ThreadData[]) {
-  const ids = threads.map(thread => thread.id)
+export async function deleteThreads(threads: ThreadData[], additionalLocalThreadIds: string[] = []) {
+  const ids = Array.from(new Set([...threads.map(thread => thread.id), ...additionalLocalThreadIds]))
 
-  const localThreadIds = threads
+  const localThreadIds = Array.from(new Set([...threads
     .filter(thread => !thread.isAutomationRunOnly && !thread.isCatalogOnly)
-    .map(thread => thread.id)
+    .map(thread => thread.id), ...additionalLocalThreadIds]))
 
   // Delete local sessions first. If Codex is still using one of them, keep the
   // secondary indexes intact so a failed delete cannot leave partial state.

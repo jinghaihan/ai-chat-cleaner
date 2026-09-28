@@ -3,6 +3,8 @@ import process from 'node:process'
 import { join } from 'pathe'
 import { x } from 'tinyexec'
 import { glob } from 'tinyglobby'
+import { AGENTS_CONFIG } from '../constants'
+import { orderThreadsForDeletion, readHistoryReferences } from './history'
 
 const CODEX_BIN_ENV = 'AI_CHAT_CLEANER_CODEX_BIN'
 const DELETE_HELP_ARGS = ['delete', '--help']
@@ -15,10 +17,14 @@ interface CodexCommandResult {
 type CodexProbe = (executable: string) => Promise<CodexCommandResult>
 
 export async function deleteCodexThreads(threadIds: string[]) {
+  const orderedIds = orderThreadsForDeletion(
+    threadIds,
+    await readHistoryReferences(AGENTS_CONFIG.codex.path),
+  )
   const executable = await resolveCodexExecutable()
 
   // Run in order: each invocation updates the same Codex state store.
-  for (const id of threadIds)
+  for (const id of orderedIds)
     await x(executable, getCodexDeleteArgs(id), { nodePath: false, throwOnError: true })
 }
 
@@ -71,10 +77,7 @@ async function getDesktopCodexCandidates() {
 }
 
 async function getMacDesktopCodexCandidates() {
-  const candidates = [
-    '/Applications/ChatGPT.app/Contents/Resources/codex',
-    '/Applications/Codex.app/Contents/Resources/codex',
-  ]
+  const appPaths = ['/Applications/ChatGPT.app', '/Applications/Codex.app']
 
   try {
     const { stdout } = await x('osascript', [
@@ -83,13 +86,22 @@ async function getMacDesktopCodexCandidates() {
     ], { nodePath: false })
     const appPath = stdout.trim()
     if (appPath)
-      candidates.unshift(join(appPath, 'Contents', 'Resources', 'codex'))
+      appPaths.unshift(appPath)
   }
   catch {
     // The fallback locations above still cover the standard installations.
   }
 
-  return candidates
+  return Array.from(new Set(appPaths)).flatMap(getMacAppCodexCandidates)
+}
+
+export function getMacAppCodexCandidates(appPath: string) {
+  const resources = join(appPath, 'Contents', 'Resources')
+  return [
+    join(resources, 'codex-cli', 'CodexCLI.app', 'Contents', 'MacOS', 'codex'),
+    join(resources, 'codex-cli', 'bin', 'codex'),
+    join(resources, 'codex'),
+  ]
 }
 
 async function getWindowsDesktopCodexCandidates() {

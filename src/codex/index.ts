@@ -10,6 +10,7 @@ import { deleteThreads } from './delete'
 import { hasActiveThreadLocks, isCodexDesktopRunning, quitCodexDesktop, reopenCodexDesktop, waitForCodexDesktopExit } from './desktop'
 import { detectCodex } from './detect'
 import { groupCodexThreads } from './group'
+import { planHistoryDeletion, readHistoryReferences } from './history'
 
 export async function promptCodex(_options: CommandOptions) {
   const spinner = p.spinner()
@@ -48,12 +49,56 @@ export async function promptCodex(_options: CommandOptions) {
   }
 
   const localThreads = resolved.filter(thread => !thread.isAutomationRunOnly && !thread.isCatalogOnly)
+  const historyPlan = localThreads.length > 0
+    ? planHistoryDeletion(
+        localThreads.map(thread => thread.id),
+        await readHistoryReferences(AGENTS_CONFIG.codex.path),
+      )
+    : { dependentIds: [], blockedIds: [] }
+  let additionalLocalThreadIds: string[] = []
+  let selectedThreads = resolved
+
+  if (historyPlan.dependentIds.length > 0) {
+    const titleById = new Map(threads.map(thread => [thread.id, thread.title]))
+    p.note(historyPlan.dependentIds
+      .map(id => `${titleById.get(id) ?? 'Unknown chat'} (${id})`)
+      .join('\n'), 'forked chats using selected history')
+
+    const deleteDependents = await p.confirm({
+      message: `Delete these ${historyPlan.dependentIds.length} forked chats too? Choose No to skip affected selected chats.`,
+      initialValue: false,
+    })
+
+    if (p.isCancel(deleteDependents)) {
+      p.outro(c.red('aborting'))
+      process.exit(1)
+    }
+
+    if (deleteDependents) {
+      additionalLocalThreadIds = historyPlan.dependentIds
+    }
+    else {
+      const blockedIds = new Set(historyPlan.blockedIds)
+      selectedThreads = resolved.filter(thread => !blockedIds.has(thread.id))
+      if (selectedThreads.length === 0) {
+        p.outro(c.yellow(`skipped ${blockedIds.size} chats; nothing deleted`))
+        return
+      }
+    }
+  }
+
+  const localThreadIds = [
+    ...selectedThreads
+      .filter(thread => !thread.isAutomationRunOnly && !thread.isCatalogOnly)
+      .map(thread => thread.id),
+    ...additionalLocalThreadIds,
+  ]
   let reopenDesktop = false
 
   try {
-    if (localThreads.length > 0 && isMacOS) {
+    if (localThreadIds.length > 0 && isMacOS) {
       const hasLocks = await hasActiveThreadLocks(
-        localThreads.map(thread => thread.id),
+        localThreadIds,
         AGENTS_CONFIG.codex.path,
       )
 
@@ -71,15 +116,16 @@ export async function promptCodex(_options: CommandOptions) {
         await quitCodexDesktop()
         reopenDesktop = true
         await waitForCodexDesktopExit(
-          localThreads.map(thread => thread.id),
+          localThreadIds,
           AGENTS_CONFIG.codex.path,
         )
       }
     }
-    await deleteThreads(resolved)
+    await deleteThreads(selectedThreads, additionalLocalThreadIds)
   }
-  catch {
-    p.outro(c.yellow('Deletion failed. ChatGPT/Codex may still be using the selected sessions. Please quit the app and run ai-chat-cleaner again.'))
+  catch (error) {
+    p.outro(c.red('Deletion failed'))
+    console.error(error)
     process.exitCode = 1
     return
   }
@@ -88,7 +134,9 @@ export async function promptCodex(_options: CommandOptions) {
       await reopenCodexDesktop()
   }
 
-  p.outro(`cleaned ${c.yellow`${resolved.length}`} threads`)
+  const cleanedCount = selectedThreads.length + additionalLocalThreadIds.length
+  const skippedCount = resolved.length - selectedThreads.length
+  p.outro(`cleaned ${c.yellow`${cleanedCount}`} threads${skippedCount ? `; skipped ${skippedCount}` : ''}`)
 }
 
 function formatConfirmMessage(threadCount: number, providerCount: number) {

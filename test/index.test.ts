@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { findCodexExecutable, getCodexDeleteArgs } from '../src/codex/cli'
+import { findCodexExecutable, getCodexDeleteArgs, getMacAppCodexCandidates } from '../src/codex/cli'
 
 describe('should', () => {
   it('exported', () => {
@@ -23,5 +23,13 @@ describe('codex CLI deletion', () => {
     )
       .resolves
       .toBe('desktop-codex')
+  })
+
+  it('checks the current desktop CLI location before legacy locations', () => {
+    expect(getMacAppCodexCandidates('/Applications/ChatGPT.app')).toEqual([
+      '/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex',
+      '/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex',
+      '/Applications/ChatGPT.app/Contents/Resources/codex',
+    ])
   })
 })
